@@ -1,0 +1,57 @@
+# Default values for litellm chart.
+# This chart deploys PostgreSQL for the LiteLLM proxy.
+
+postgresql:
+  enabled: true
+  fullnameOverride: ""
+  image:
+    repository: docker.io/library/postgres
+    pullPolicy: IfNotPresent
+    tag: "17.4-alpine"
+  service:
+    type: ClusterIP
+    port: 5432
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+  storage:
+    storageClassName: ""
+    accessMode: ReadWriteOnce
+    size: 8Gi
+  credentials:
+    username: litellm
+    password: ""
+    postgresPassword: ""
+    database: litellm
+  livenessProbe:
+    exec:
+      command:
+        - pg_isready
+        - -U
+        - litellm
+        - -d
+        - litellm
+        - -h
+        - 127.0.0.1
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    exec:
+      command:
+        - pg_isready
+        - -U
+        - litellm
+        - -d
+        - litellm
+        - -h
+        - 127.0.0.1
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3

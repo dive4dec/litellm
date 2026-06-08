@@ -1,0 +1,9 @@
+*.tar.gz
+index.yaml
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

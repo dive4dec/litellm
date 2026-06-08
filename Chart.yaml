@@ -1,0 +1,10 @@
+apiVersion: v2
+name: litellm
+description: LiteLLM database chart — PostgreSQL backend for LiteLLM proxy
+type: application
+version: 0.1.0
+appVersion: "17.4"
+
+dependencies:
+  - name: postgresql
+    condition: postgresql.enabled
