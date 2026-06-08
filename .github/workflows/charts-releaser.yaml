@@ -1,15 +1,15 @@
-name: Release Charts
+name: Release Helm Chart
 
 on:
   push:
     branches:
       - main
+    paths:
+      - '**'
+  workflow_dispatch:
 
 jobs:
-  release:
-    permissions:
-      contents: write
-      packages: write
+  release-chart:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,18 +17,35 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
-        with:
-          config: .cr.yaml
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
 
-      - name: Publish to GitHub Pages
-        uses: stefanprodan/helm-gh-pages@v1.7.0
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+
+      - name: Package Helm Chart
+        run: |
+          helm package . --destination .deploy
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          charts_dir: .
-          charts_url: https://${{ github.repository_owner }}.github.io/${{ github.repository_name }}
-          owner: ${{ github.repository_owner }}
-          git_email: 41898282+github-actions[bot]@users.noreply.github.com
+          ref: 'gh-pages'
+          path: 'gh-pages'
+
+      - name: Copy Helm package to gh-pages
+        run: |
+          cp .deploy/*.tgz gh-pages/
+
+      - name: Update Helm repo index
+        run: |
+          cd gh-pages
+          helm repo index . --url https://dive4dec.github.io/litellm/
+          git add .
+          git commit -m "Release new Helm chart version"
+          git push origin gh-pages
