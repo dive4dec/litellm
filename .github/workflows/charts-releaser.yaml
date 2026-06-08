@@ -25,7 +25,7 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Publish to GitHub Pages
-        uses: stefanprodan/helm-gh-pages@v1.7.1
+        uses: stefanprodan/helm-gh-pages@v1.7.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           charts_dir: .
